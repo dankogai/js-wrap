@@ -39,7 +39,7 @@
         toJSON:   { value: function() { return this.value } },
         learn:    { value: function(name, fun, type) {
             this[name] = function() {
-                return _(fun.apply(this.value, arguments), type)
+                return _(fun.apply(this.value, arguments), type);
             }
             return this;
         }}
@@ -77,6 +77,9 @@
     //
     function _(that, klass) {
         // console.log(arguments);
+        // We do not wrap nullables
+        if (that === void(0) || that === null) return that;
+        // And already wrapped objects
         if (has(that, '__value__')) return that;
         klass = klass || classOf(that);
         if (!_[klass]) throw new TypeError(klass + ' unsupported');
