@@ -227,13 +227,19 @@
     _.Function = function(f) {
         var w = f.bind(f);
         var wfp = _.Function.prototype;
+        if (has(f, '__value__')) {
+            getOwnPropertyNames(f).forEach(function(p){
+                defineProperty(w, p, {value:Kernel[p], writable:true})
+            });
+        } else {
+            getOwnPropertyNames(Kernel).forEach(function(p){
+                defineProperty(w, p, {value:Kernel[p], writable:true})
+            });
+            getOwnPropertyNames(wfp).forEach(function(p){
+                defineProperty(w, p, {value:wfp[p], writable:true})
+            });
+        }
         defineProperty( w, '__value__', {value:f});
-        getOwnPropertyNames(Kernel).forEach(function(p){
-            defineProperty(w, p, {value:Kernel[p], writable:true})
-        });
-        getOwnPropertyNames(wfp).forEach(function(p){
-            defineProperty(w, p, {value:wfp[p], writable:true})
-        });
         return w;
     };
     var _apply = function() {
