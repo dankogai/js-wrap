@@ -226,32 +226,33 @@
     // Function - this one is a little tricky
     _.Function = function(f) {
         var w = f.bind(f);
-        var wfp = _.Function.prototype;
         if (has(f, '__value__')) {
             getOwnPropertyNames(f).forEach(function(p){
-                defineProperty(w, p, {value:Kernel[p], writable:true})
+                defineProperty(w, p, getOwnPropertyDescriptor(f, p));
             });
         } else {
+            var wfp = _.Function.prototype;
             getOwnPropertyNames(Kernel).forEach(function(p){
-                defineProperty(w, p, {value:Kernel[p], writable:true})
+                defineProperty(w, p, getOwnPropertyDescriptor(Kernel, p))
             });
             getOwnPropertyNames(wfp).forEach(function(p){
-                defineProperty(w, p, {value:wfp[p], writable:true})
+                defineProperty(w, p, getOwnPropertyDescriptor(wfp, p))
             });
         }
         defineProperty( w, '__value__', {value:f});
         return w;
     };
-    var _apply = function() {
-        var args = slice.call(arguments),
-        ctx = args.shift();
-        return _(this.__value__.apply(ctx, args));
-    };
     _.Function.prototype = create(Kernel, obj2specs({
-        apply: _apply,
+        apply: function(ctx, args) {
+            return _(this.__value__.apply(ctx, args));
+        },
         // bind does not work :-(
         // TypeError: Bind must be called on a function
-        call: _apply
+        call: function() {
+              var args = slice.call(arguments),
+              ctx = args.shift();
+              return _(this.__value__.apply(ctx, args));
+        }
     }));
     // RegExp - wrapped only opon request
     _.RegExp = function(r) {
