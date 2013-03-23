@@ -24,23 +24,25 @@
     R = RegExp, RP = R.prototype,
     D = Date, DP = D.prototype,
     defineProperties = O.defineProperties,
+    defineProperty = O.defineProperty,
+    getOwnPropertyDescriptor = O.getOwnPropertyDescriptor,
     getOwnPropertyNames = O.getOwnPropertyNames,
     hasOwnProperty = OP.hasOwnProperty,
     keys = O.keys,
     slice = AP.slice,
     toString = OP.toString;
-
     var has = function(o, k) { return hasOwnProperty.call(o, k) };
     var classOf = function(o) { return toString.call(o).slice(8, -1) };
     // Mother of all objects
     var valueOf = function() { return this.__value__ };
     var Kernel = create(null, {
         valueOf: { value: valueOf },
+        toString: { value: function(){ return this.__value__.toString() } },
         value: { get: valueOf },
         toJSON: { value: function() { return this.value } },
         learn: { value: function(name, fun, klass) {
             this[name] = function() {
-                return _(fun.apply(this.value, arguments));
+                return _(fun.apply(this.value, arguments), klass);
             };
             return this;
         }}
@@ -92,15 +94,15 @@
                 : type[0].toUpperCase() + type.slice(1);
             if ({
                 Boolean: true,  // && and || don't coerce
-                Function: true,  // expensive
-                RegExp: true,  // moot
-                Date: true   // ditto
+                Function: true, // expensive
+                RegExp: true,   // moot
+                Date: true      // ditto
             }[klass]) return that;
         }
         // wrap only supported types
         return _[klass] ? _[klass](that) : that;
     };
-    // Boolean
+    // Boolean - wrapped only on explicit request
     _.Boolean = function(b) {
         return create(_.Boolean.prototype, {
              __value__: { value: !!b }
@@ -156,7 +158,7 @@
     defineProperties(_.String.prototype, {
         length: { get: function() { return this.value.length } }
     });
-    // Object
+    // Object - wrapped as a collection type
     _.Object = function(o) {
         return create(_.Object.prototype, {
             __value__: { value: o },
@@ -164,7 +166,7 @@
         });
     };
     _.Object.prototype = create(Kernel, obj2specs({
-        has: function(k) { return has(this.value, k) },
+        has: function(k) { return has(this.__value__, k) },
         get: function(k) { return _(this.__value__[k]) },
         set: function(k, v) {
             if (!this.has(k)) this.__size__++;
@@ -221,7 +223,31 @@
             set: function(n) { return this.value.length = _(n).value * 1 }
        }
     });
-    // RegExp
+    // Function - this one is a little tricky
+    _.Function = function(f) {
+        var w = f.bind(f);
+        var wfp = _.Function.prototype;
+        defineProperty( w, '__value__', {value:f});
+        getOwnPropertyNames(Kernel).forEach(function(p){
+            defineProperty(w, p, {value:Kernel[p], writable:true})
+        });
+        getOwnPropertyNames(wfp).forEach(function(p){
+            defineProperty(w, p, {value:wfp[p], writable:true})
+        });
+        return w;
+    };
+    var _apply = function() {
+        var args = slice.call(arguments),
+        ctx = args.shift();
+        return _(this.__value__.apply(ctx, args));
+    };
+    _.Function.prototype = create(Kernel, obj2specs({
+        apply: _apply,
+        // bind does not work :-(
+        // TypeError: Bind must be called on a function
+        call: _apply
+    }));
+    // RegExp - wrapped only opon request
     _.RegExp = function(r) {
         return create(_.RegExp.prototype, {
             __value__: { value: r }
@@ -237,7 +263,7 @@
         ignoreCase: { get: function() { return this.value.ignoreCase } },
         lastIndex: { get: function() { return this.value.ignoreCase } }
     });
-    // Date
+    // Date - wrapped only opon request
     _.Date = function(d) {
         return create(_.Date.prototype, {
             __value__: { value: d }
