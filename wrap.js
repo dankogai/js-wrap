@@ -68,6 +68,28 @@
         }
         return this;
     };
+    var uniq = function(a) {
+        var seen = create(null);
+        for (var i = 0, l = a.length; i < l; ++i) seen[a[i]] = true;
+        return keys(seen);
+    }
+    var getPropertyNames = function(obj) {
+        var names = [];
+        do {
+            names.push.apply(names, getOwnPropertyNames(obj));
+            obj = getPrototypeOf(obj);
+        } while (obj);
+        return uniq(names);
+    };
+    var methodsOf = function() {
+        var meths = [], names = getPropertyNames(this);
+        for (var i = 0, l = names.length; i < l; ++i) {
+            var k = names[i];
+            if (this[k] === methodsOf) break; // or infinite loop!
+            if (typeof(this[k]) === 'function') meths.push(k);
+        };
+        return meths.concat(['methodsOf']).sort();
+    };
     var is = O.is || function is(x, y) {
         return x === y
             ? x !== 0 ? true
@@ -91,7 +113,9 @@
         'class': { get: _classOf },
         learn: { value: learn },
         is: { value: isThis },
-        isnt: { value: isntThis }
+        isnt: { value: isntThis },
+        methodsOf:{ value: methodsOf },
+        methods: { get: methodsOf }
     });
     function isWrapped(o) { return isPrototypeOf.call(Kernel, o) };
     var obj2specs = function(o) {
@@ -147,7 +171,6 @@
             __value__: { value: !!b }
         });
     };
-    _.Boolean.prototype = create(Kernel);
     _.Boolean.prototype = create(Kernel, obj2specs({
         not: function() {
             return _.Boolean(!this.value);
