@@ -98,10 +98,10 @@ var z = null,                   wz = Object.Wrap(z, 1),
     d = new Date(0),            wd = Object.Wrap(d, 1);
 assert(Object.Wrap(z) === z && wz !== z && wz.value === z);
 assert(Object.Wrap(u) === u && wu !== u && wu.value === u);
-assert(Object.Wrap(b) === b && wb !== b && wz.value === b);
-assert(Object.Wrap(f) === f && wf !== f && wz.value === f);
-assert(Object.Wrap(r) === r && wr !== r && wz.value === r);
-assert(Object.Wrap(d) === d && wd !== d && wz.value === d);
+assert(Object.Wrap(b) === b && wb !== b && wb.value === b);
+assert(Object.Wrap(f) === f && wf !== f && wf.value === f);
+assert(Object.Wrap(r) === r && wr !== r && wr.value === r);
+assert(Object.Wrap(d) === d && wd !== d && wd.value === d);
 ````
 
 #### `var _ = Object.Wrap;`
