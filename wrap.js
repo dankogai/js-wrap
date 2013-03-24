@@ -398,5 +398,8 @@
         'setHours', 'setUTCDate'
     ]));
     // Install!
-    Object.Wrap = _;
+    //   Should we use installproperty.js ?
+    //   https://github.com/dankogai/js-installproperty
+    defineProperty(Object, 'Wrap', 
+                   { value:_, configurable:true, wriable:true });
 })(this);
