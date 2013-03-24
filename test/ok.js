@@ -10,6 +10,6 @@ if (this['window'] !== this) {
 (function(root){
     'use strict';
     describe('OK', function() {
-        it ('is ok', ok(true));
+        it ('loaded', ok(Object.Wrap));
     });
 })(this);
