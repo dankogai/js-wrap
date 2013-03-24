@@ -14,7 +14,7 @@ Usage
 <script src="wrap.js"></script>
 ````
 
-### on node.js
+### On node.js:
 
 ````javascript
 require('wrap');
@@ -25,16 +25,17 @@ Synopsis
 --------
 
 ````javascript
-var _ = Object.Wrap;	// for convenience.
+// for convenience
+var _ = Object.Wrap;
+// singleton method!
 _(42)
-	.learn('square',	// singleton method!
-			function(){ return this*this })
-	.square() * 1;	// 1764;
-(42).square;		// TypeError: Object 42 has no method 'square'
+  .learn('square', function() { return this*this })
+  .square() * 1;	// 1764;
+(42).square();		// TypeError: Object 42 has no method 'square'
+// class method without changing Number
 _.Number.prototype
-	.learn('times',		// class method without changing Number
-			function(f) { for (var i = 0; i < this; i++) f(i) });
-_(42).times(function(n){ console.log(n) });
-(42).times(function(n){ console.log(n) });	// TypeError
+  .learn('times', function(f) { for (var i = 0; i < this; i++) f(i) });
+_(42).times(function(n){ console.log(n) });	// see your log!
+(42).times(function(n){ console.log(n) });	// TypeError: Object 42 has no method 'times'
 
 ````
