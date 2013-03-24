@@ -56,8 +56,7 @@
                     this.value,
                     slice.call(arguments).map(function(v) {
                         return isWrapped(v) ? v.value : v;
-                    })
-                ), klass);
+                    })), klass);
             };
             defineProperty(this, name, {enumerable: false});
         } else {
@@ -69,6 +68,19 @@
         }
         return this;
     };
+    var is = O.is || function is(x, y) {
+        return x === y
+            ? x !== 0 ? true
+            : (1 / x === 1 / y) // +-0
+        : (x !== x && y !== y); // NaN
+    };
+    var isThis = function(that) { 
+        return is(this.value, isWrapped(that) ? that.value : that)
+    };
+    var isnt = O.isnt || function isnt(x, y) { return !is(x, y) };
+    var isntThis = function(that) { 
+        return isnt(this.value, isWrapped(that) ? that.value : that)
+    };
     // Mother of all objects
     var Kernel = create(null, {
         valueOf: { value: _valueOf },
@@ -77,7 +89,9 @@
         toJSON: { value: _valueOf },
         value: { get: _valueOf },
         'class': { get: _classOf },
-        learn: { value: learn }
+        learn: { value: learn },
+        is: { value: isThis },
+        isnt: { value: isntThis }
     });
     function isWrapped(o) { return isPrototypeOf.call(Kernel, o) };
     var obj2specs = function(o) {
@@ -95,11 +109,13 @@
         if (_.debug) console.log(arguments);
         // if already wrapped just return that
         if (isWrapped(that)) return that;
-        if (!klass) { // if unspecifed, check the type of that
+        // if unspecifed, check the type of that
+        if (!klass) {
             klass = classOf(that);
             if (! _[klass]) return that;
             if (! _[klass].autowrap) return that;
         } else {
+            // if klass is true but non-string, investigate
             if (typeof klass !== 'string') klass = classOf(that);
         }
         // wrap only supported types
@@ -195,11 +211,11 @@
         has: function(k) { return has(this.__value__, k) },
         get: function(k) { return _(this.__value__[k]) },
         set: function(k, v) {
-            if (!this.has(k)) this.__size__++;
+            if (!has(this.__value__, k)) this.__size__++;
             return _(this.__value__[k] = v);
         },
         'delete': function(k) {
-            if (!this.has(k)) return false;
+            if (!has(this.__value__, k)) return false;
             this.__size__--;
             delete this.__value__[k];
             return true;
@@ -271,10 +287,10 @@
         copyOf: function(){ return copyOf(this) },
         keys: function() { return keys(this) },
         values: function() {
-            return keys(this).map(function(k) { return this[k] });
+            return keys(this).map(function(k) { return this[k] }, this);
         },
         items: function() {
-            return keys(this).map(function(k) { return [k, this[k]] });
+            return keys(this).map(function(k) { return [k, this[k]] }, this);
         },
         extend: function(o) { return extend(this, o) },
         defaults: function(o) { return defaults(this, o) },
@@ -323,35 +339,23 @@
     });
     // Function - this one is a little tricky
     _.Function = function(f) {
-        var w = f.bind(f);
-        if (has(f, '__value__')) {
-            getOwnPropertyNames(f).forEach(function(p) {
-                defineProperty(w, p, getOwnPropertyDescriptor(f, p));
-            });
-        } else {
-            var wfp = _.Function.prototype;
-            getOwnPropertyNames(Kernel).forEach(function(p) {
-                defineProperty(w, p, getOwnPropertyDescriptor(Kernel, p));
-            });
-            getOwnPropertyNames(wfp).forEach(function(p) {
-                defineProperty(w, p, getOwnPropertyDescriptor(wfp, p));
-            });
+        if (has(f, '__value__') && typeof f.value === 'function') {
+            return f;
         }
-        defineProperty(w, '__value__', {value: f});
+        var w = f.bind(f);
+        // no prototype chain. just compose
+        extend(w, Kernel);
+        extend(w, _.Function.prototype);
+        defineProperties(w, {
+            __class__: { value: 'Function' },
+            __value__: { value: f }
+        });
         return w;
     };
-    _.Function.prototype = create(Kernel, obj2specs({
-        apply: function(ctx, args) {
-            return _(this.__value__.apply(ctx, args));
-        },
-        // bind does not work :-(
-        // TypeError: Bind must be called on a function
-        call: function() {
-              var args = slice.call(arguments),
-              ctx = args.shift();
-              return _(this.__value__.apply(ctx, args));
-        }
-    }));
+    _.Function.prototype = create(Kernel);
+    _.Function.prototype.learn(picked(FP, [
+        'apply', 'call'
+    ]));
     // RegExp - wrapped only opon request
     _.RegExp = function(r) {
         return create(_.RegExp.prototype, {
