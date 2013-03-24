@@ -108,6 +108,22 @@
     // _.debug = true;
     _.Kernel = Kernel;
     _.isWrapped = isWrapped;
+    // Null
+    _.Null = function(b) {
+        return create(_.Boolean.prototype, {
+            __class__: { value: 'Null' },
+            __value__: { value: null }
+        });
+    };
+    _.Null.autowrap = true;
+    // Undefined
+    _.Undefined = function(b) {
+        return create(_.Boolean.prototype, {
+            __class__: { value: 'Undefined' },
+            __value__: { value: undefined }
+        });
+    };
+    _.Undefined.autowrap = true;
     // Boolean - wrapped only on explicit request
     _.Boolean = function(b) {
         return create(_.Boolean.prototype, {
