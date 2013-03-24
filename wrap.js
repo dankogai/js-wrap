@@ -131,7 +131,7 @@
             __value__: { value: null }
         });
     };
-    _.Null.autowrap = true;
+    // _.Null.autowrap = true;
     // Undefined
     _.Undefined = function(b) {
         return create(_.Boolean.prototype, {
@@ -139,7 +139,7 @@
             __value__: { value: undefined }
         });
     };
-    _.Undefined.autowrap = true;
+    //_.Undefined.autowrap = true;
     // Boolean - wrapped only on explicit request
     _.Boolean = function(b) {
         return create(_.Boolean.prototype, {
@@ -209,10 +209,10 @@
     _.Object.autowrap = true;
     _.Object.prototype = create(Kernel, obj2specs({
         has: function(k) { return has(this.__value__, k) },
-        get: function(k) { return _(this.__value__[k]) },
+        get: function(k) { return _(this.__value__[k], true) },
         set: function(k, v) {
             if (!has(this.__value__, k)) this.__size__++;
-            return _(this.__value__[k] = v);
+            return _(this.__value__[k] = v, true);
         },
         'delete': function(k) {
             if (!has(this.__value__, k)) return false;

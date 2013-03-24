@@ -11,18 +11,17 @@ if (this['window'] !== this) {
     'use strict';
     var _ = Object.Wrap;
     describe('Null', function() {
-        it('is wrapped by default',
-           ok(_(null) !== null && _(null).value === null));
-        it('is unwrapped by operators', ok(''+_(null) === ''+null))
-        it('.class === "Null"', ok(_(null).class === 'Null'));
+        it('is not wrapped by default', ok(_(null) === null));
+        it('is wrapped upon request', 
+           ok(_(null, 1) !== null && _(null, 1).value === null));
+        it('is unwrapped by operators', ok(''+_(null, 1) === ''+null))
+        it('.class === "Null"', ok(_(null, 1).class === 'Null'));
     });
     describe('Undefined', function() {
-        it('is wrapped by default', 
-           ok(_(undefined) !== undefined 
-              && _(undefined).value === undefined));
-        it('is unwrapped by operators',
-           ok(''+_(undefined) === ''+undefined))
-        it('.class === "Undefined"', 
-           ok(_(undefined).class === 'Undefined'));
+        it('is not wrapped by default', ok(_(void(0)) === void(0)));
+        it('is wrapped upon request', 
+           ok(_(void(0), 1) !== void(0) && _(void(0), 1).value === void(0)));
+        it('is unwrapped by operators', ok(''+_(void(0), 1) === ''+void(0)))
+        it('.class === "Undefined"', ok(_(void(0), 1).class === 'Undefined'));
     });
 })(this);
