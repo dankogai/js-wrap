@@ -1,0 +1,29 @@
+{
+  "name": "js-wrap",
+  "version": "0.0.1",
+  "description": "Universal Wrapper Object System for ECMAScript 5 and beyond",
+  "main": "wrap.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+      "mocha" : "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/dankogai/js-wrap.git"
+  },
+  "keywords": [
+    "ES5",
+    "ESMAScript5",
+    "wrap",
+    "wrapper"
+  ],
+  "author": "Dan Kogai",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "gitHead": "1fd5f3bc6865ef24e33ce86fb0c9cb8ea8416e72"
+}

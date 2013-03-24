@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: wrap.js,v 0.1 2013/03/24 20:10:15 dankogai Exp dankogai $
  *
  *  (c) 2013 Dan Kogai
  *
@@ -72,7 +72,7 @@
         var seen = create(null);
         for (var i = 0, l = a.length; i < l; ++i) seen[a[i]] = true;
         return keys(seen);
-    }
+    };
     var getPropertyNames = function(obj) {
         var names = [];
         do {
@@ -87,7 +87,7 @@
             var k = names[i];
             if (this[k] === methodsOf) break; // or infinite loop!
             if (typeof(this[k]) === 'function') meths.push(k);
-        };
+        }
         return meths.concat(['methodsOf']).sort();
     };
     var is = O.is || function is(x, y) {
@@ -96,12 +96,12 @@
             : (1 / x === 1 / y) // +-0
         : (x !== x && y !== y); // NaN
     };
-    var isThis = function(that) { 
-        return is(this.value, isWrapped(that) ? that.value : that)
+    var isThis = function(that) {
+        return is(this.value, isWrapped(that) ? that.value : that);
     };
     var isnt = O.isnt || function isnt(x, y) { return !is(x, y) };
-    var isntThis = function(that) { 
-        return isnt(this.value, isWrapped(that) ? that.value : that)
+    var isntThis = function(that) {
+        return isnt(this.value, isWrapped(that) ? that.value : that);
     };
     // Mother of all objects
     var Kernel = create(null, {
@@ -114,7 +114,7 @@
         learn: { value: learn },
         is: { value: isThis },
         isnt: { value: isntThis },
-        methodsOf:{ value: methodsOf },
+        methodsOf: { value: methodsOf },
         methods: { get: methodsOf }
     });
     function isWrapped(o) { return isPrototypeOf.call(Kernel, o) };
@@ -150,7 +150,7 @@
     _.isWrapped = isWrapped;
     // Null
     _.Null = function(b) {
-        return create(_.Boolean.prototype, {
+        return create(Kernel, {
             __class__: { value: 'Null' },
             __value__: { value: null }
         });
@@ -158,7 +158,7 @@
     // _.Null.autowrap = true;
     // Undefined
     _.Undefined = function(b) {
-        return create(_.Boolean.prototype, {
+        return create(Kernel, {
             __class__: { value: 'Undefined' },
             __value__: { value: undefined }
         });
@@ -226,7 +226,7 @@
         return create(_.Object.prototype, {
             __class__: { value: 'Object' },
             __value__: { value: o },
-            __size__:  { value: keys(o).length, writable: true }
+            __size__: { value: keys(o).length, writable: true }
         });
     };
     _.Object.autowrap = true;
@@ -254,7 +254,7 @@
     };
     function copyOf(src) { // shallow copy
         return extend(create(getPrototypeOf(src)), src);
-    }
+    };
     function defaults(dst, src) {
         var isarray = isArray(src);
         getOwnPropertyNames(src).forEach(function(k) {
@@ -307,7 +307,7 @@
         return dst;
     };
     _.Object.prototype.learn({
-        copyOf: function(){ return copyOf(this) },
+        copyOf: function() { return copyOf(this) },
         keys: function() { return keys(this) },
         values: function() {
             return keys(this).map(function(k) { return this[k] }, this);
@@ -423,6 +423,6 @@
     // Install!
     //   Should we use installproperty.js ?
     //   https://github.com/dankogai/js-installproperty
-    defineProperty(Object, 'Wrap', 
-                   { value:_, configurable:true, wriable:true });
+    defineProperty(Object, 'Wrap',
+                   { value: _, configurable: true, wriable: true });
 })(this);
