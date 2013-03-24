@@ -15,6 +15,7 @@ if (this['window'] !== this) {
         var a = [];
         it('is wrapped by default', ok(_(a) !== 0 && _(a).value === a));
         it('is unwrapped by operators', ok(!!_(a) === !!a))
+        it('.class === "Array"', ok(_(a).class === 'Array'));
     });
     // ES3 methods
     describe('Array Methods', function() {

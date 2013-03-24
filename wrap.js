@@ -48,6 +48,7 @@
     };
     var _valueOf = function() { return this.__value__ };
     var _toString = function() { return '' + this.__value__};
+    var _classOf = function() { return this.__class__ };
     var learn = function(name, fun, klass) {
         if (typeof name === 'string') {
             this[name] = function() {
@@ -62,7 +63,7 @@
         } else {
             var pairs = name;
             getOwnPropertyNames(pairs).forEach(function(name) {
-                var fun = pairs[name]; //, klass = fun.class;
+                var fun = pairs[name]; /* klass = fun.class; */
                 this.learn(name, fun);
             }, this);
         }
@@ -72,8 +73,10 @@
     var Kernel = create(null, {
         valueOf: { value: _valueOf },
         toString: { value: _toString },
+        classOf: { value: _classOf },
         toJSON: { value: _valueOf },
         value: { get: _valueOf },
+        'class': { get: _classOf },
         learn: { value: learn }
     });
     function isWrapped(o) { return isPrototypeOf.call(Kernel, o) };
@@ -87,12 +90,11 @@
     //
     // I am not Underscore; it's just my nickname!
     //
-    function _(that, klass) {
+    var _ = function Wrap(that, klass) {
+        if (arguments.length < 1) throw TypeError('first argument missing');
         if (_.debug) console.log(arguments);
         // if already wrapped just return that
         if (isWrapped(that)) return that;
-        // nil values are also returned immediately
-        if (that === void(0) || that === null) return that;
         if (!klass) { // if unspecifed, check the type of that
             klass = classOf(that);
             if (! _[klass]) return that;
@@ -109,7 +111,8 @@
     // Boolean - wrapped only on explicit request
     _.Boolean = function(b) {
         return create(_.Boolean.prototype, {
-             __value__: { value: !!b }
+            __class__: { value: 'Boolean' },
+            __value__: { value: !!b }
         });
     };
     _.Boolean.prototype = create(Kernel);
@@ -130,6 +133,7 @@
     // Number
     _.Number = function(n) {
         return create(_.Number.prototype, {
+            __class__: { value: 'Number' },
             __value__: { value: 1 * n }
         });
     };
@@ -144,6 +148,7 @@
     // String -- without hairy .blink and such
     _.String = function(s) {
         return create(_.String.prototype, {
+            __class__: { value: 'String' },
             __value__: { value: '' + s }
         });
     };
@@ -164,8 +169,9 @@
     // Object - wrapped as a collection type
     _.Object = function(o) {
         return create(_.Object.prototype, {
+            __class__: { value: 'Object' },
             __value__: { value: o },
-            __size__: { value: keys(o).length, writable: true }
+            __size__:  { value: keys(o).length, writable: true }
         });
     };
     _.Object.autowrap = true;
@@ -246,6 +252,7 @@
         return dst;
     };
     _.Object.prototype.learn({
+        copyOf: function(){ return copyOf(this) },
         keys: function() { return keys(this) },
         values: function() {
             return keys(this).map(function(k) { return this[k] });
@@ -278,6 +285,7 @@
     // Array
     _.Array = function(a) {
         return create(_.Array.prototype, {
+            __class__: { value: 'Array' },
             __value__: { value: a }
         });
     };
@@ -331,6 +339,7 @@
     // RegExp - wrapped only opon request
     _.RegExp = function(r) {
         return create(_.RegExp.prototype, {
+            __class__: { value: 'RegExp' },
             __value__: { value: r }
         });
     };
@@ -347,6 +356,7 @@
     // Date - wrapped only opon request
     _.Date = function(d) {
         return create(_.Date.prototype, {
+            __class__: { value: 'Date' },
             __value__: { value: d }
         });
     };

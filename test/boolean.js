@@ -12,8 +12,10 @@ if (this['window'] !== this) {
     var _ = Object.Wrap;
     describe('Boolean', function() {
         it('is not wrapped by default', ok(_(false) === false));
-        it('is wrapped by request', ok(
-            _(false, 1) !== false && _(false, 1).value === false));
+        it('is wrapped by request', 
+           ok(_(false, 1) !== false && _(false, 1).value === false));
+        it('.class === "Boolean"', 
+           ok(_(false, 1).class === 'Boolean'));
     });
     describe('Boolean Methods', function() {
         var t = _.Boolean(true), f = _.Boolean(false);

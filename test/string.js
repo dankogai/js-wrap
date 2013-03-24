@@ -13,6 +13,7 @@ if (this['window'] !== this) {
     describe('String', function() {
         it('is wrapped by default', ok(_('') !== 0 && _('').value === ''));
         it('is unwrapped by operators', ok(''+_('') === ''))
+        it('.class === "String"', ok(_('').class === 'String'));
     });
     describe('String Methods', function() {
         var s = 'The Answer to the Ultimate Question';

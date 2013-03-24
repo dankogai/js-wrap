@@ -13,6 +13,7 @@ if (this['window'] !== this) {
     describe('Number', function() {
         it('is wrapped by default', ok(_(0) !== 0 && _(0).value === 0));
         it('is unwrapped by operators', ok(+_(0) === 0))
+        it('.class === "Number"', ok(_(0).class === 'Number'));
     });
     describe('Number Methods', function() {
         var n = 42.195;
