@@ -35,7 +35,7 @@ _(42)
 _.Number.prototype
   .learn('times', function(f) { for (var i = 0; i < this; i++) f(i) });
 _(42).times(function(n){ console.log(n) });  // see your log!
-(42).times(function(n){ console.log(n) });	// TypeError: Object 42 has no method 'times'
+(42).times(function(n){ console.log(n) });  // TypeError: Object 42 has no method 'times'
 
 ````
 
@@ -84,8 +84,8 @@ And the following types are wrapped by giving truthy value to the secound argume
 + `Undefined`
 + `Boolean`
 + `Function`
-+ `RegExp`
-+ `Date`
++ `RegExp` - not in the test suite
++ `Date` - not in the test suit
 
 Objects of any other classes like DOM objects stay unwrapped regardless of *klass*.
 
@@ -228,7 +228,7 @@ wo.value;       // {zero:0,one:1,five:5}
 #### .delete( *key* )
 
 Deletes *key* from the object.
-Returns `true` on success, `false` on failure (*key* is nonexistent).
+Returns `true` on success, `false` on failure ( *key* is nonexistent).
 
 ````javascript
 var wa = [0,1,2,3];
@@ -241,9 +241,9 @@ wo.delete('five');  // false
 wo.value;           // {one:1}
 ````
 
-### Predefined Methods
+### .methods
 
-The whole point of this script to make object (un)?wrapping as easy and transparent as possible.  Therefore most of built-in methods are already `learn()`ed.
+The whole point of this script to make object (un)?wrapping as easy, transparent and intuitive as possible.  Therefore most of built-in methods are already `learn()`ed.
 
 ````javascript
 _({zero:0,one:1,two:2,three:3})
@@ -254,7 +254,14 @@ _({zero:0,one:1,two:2,three:3})
     * 10 + 2                                    // 42
 ````
 
-See the source for the complete list of predefined methods.
+Like Ruby, the wrapped object has `.methods` so you can ask the object itself what it can do.
+
+````javascript
+console.log(_(null, 1).methods)
+// ["classOf", "is", "isnt", "learn", "methodsOf", "toJSON", "toString", "valueOf"]
+````
+
+To learn even more, consult the source code.
 
 Why Wrap?
 ---------
@@ -335,4 +342,26 @@ Then came [jQuery] and [Underscore.js], sporting method chains without clobberin
 [jQuery]: http://jquery.org/
 [Underscore.js]: http://underscorejs.org/
 
-That's where **wrapping** comes to rescue
+That's where **wrapping** came to rescue.  Here's how it is done.
+
++ Store the original object reference
+  + Underscore.js uses `.wrapped` property
+  + wrap.js uses `__value__`, which is non-enumerable, unwritable, and unconfigurable thanks to ES5
++ Provide accessor methods which unwraps and rewraps the value
+  + and if possible, privide a method which turns provided methods/functions into accessor.
+    + Underscore.js does that via `_.mixin()`
+    + wrap.js does that via `.learn()
+
+This wrapper method approach has proven very successful.  But most are limited to collection types.  wrap.js pushes further.  You can wrap primitives and even functions!
+
+### What's the catch?
+
+Performance, maybe. Under the hood, you have to unwrap and rewrap for each method invocation.  I'm yet to benchmark this script but chances are it is slower than direct prototype extension.
+
+See Also
+--------
+
++ [jQuery]
++ [Underscore.js]
++ http://wiki.ecmascript.org/doku.php?id=harmony:proposals
+  + http://wiki.ecmascript.org/doku.php?id=harmony:direct_proxies
