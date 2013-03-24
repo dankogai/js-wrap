@@ -87,6 +87,8 @@ And the following types are wrapped by giving truthy value to the secound argume
 + `RegExp`
 + `Date`
 
+Objects of any other classes like DOM objects stay unwrapped regardless of *klass*.
+
 ````javascript
 var z = null,                   wz = Object.Wrap(z, 1),
     u = undefined,              wu = Object.Wrap(u, 1),
@@ -102,16 +104,6 @@ assert(Object.Wrap(r) === r && wr !== r && wz.value === r);
 assert(Object.Wrap(d) === d && wd !== d && wz.value === d);
 ````
 
-#### Why `Null`, `Undefined`, and `Boolean` are not wrapped by default
-
-They are not wrapped by default because unlike `Numbers` and `String`, boolean operators do not coerce.
-
-````javascript
-Object(21)  + Object(21);   // 42
-Object('4') + Object('2');  // '42'
-!!Object(false);            // true because ! does not coerce and objects are always true
-````
-
 #### `var _ = Object.Wrap;`
 
 You can directly call `Object.wrap()` but it is handier to alias that with following idiom:
@@ -121,6 +113,148 @@ var _ = Object.Wrap;    // or '$' or 'wrap' or any name you like -- it's lexical
 ````
 
 From now on, we assume `_` be aliased to `Object.Wrap`.
+
+#### Why `Null`, `Undefined`, and `Boolean` are not wrapped by default
+
+They are not wrapped by default because unlike `Numbers` and `String`, boolean operators do not coerce.
+
+````javascript
+Object(21)  + Object(21);   // 42
+Object('4') + Object('2');  // '42'
+!!Object(false);            // surprisingly true
+                            // because ! does not coerce 
+                            // and objects are always true
+````
+
+Like `Object()`'ed primitives, `Object.Wrap()`'ed objects gets unwrapped by operators:
+
+````javascript
+_(21)  + _(21);         // 42
+_('4') + _('2');        // '42'
+!!_(false);             // false because it is not wrapped
+!!_(null);              // false
+!!_(undefined);         // false
+!!_(false, 1);          // true because it is wrapped
+!!_(false, 1).value;    // false because it is unwrapped explicitly
+````
+
+### `.learn()`
+
+It is pointless to wrap objects unless you can extend it at ease.  We resort to wrapping them because [it is considered harmful to extend built-in prototypes](#why-wrap), most notably `Object.prototype`.  But to extend methods for wrapped objects, you have to first unwrap `this` and all arguments, feed it to the functions, then wrap it back again.  That's pain in the rhino arse!
+
+the `.learn()` method is exactly for that.
+
+#### .learn(*name*, *fun* *[, klass]*)
+
+You have already seen it in [Synopsis](#synopsis).  Just define a method as you define an ordinary method in prototype and `.learn()` converts that for wrapped version.
+
+````
+var wn = _(42);
+wn.learn('square', function() { return this*this }, 'Number');
+````
+
+The third argument *klass* is optional.  If specified it is used to determine the return type.  When lost, just leave it blank.
+
+#### .learn( *methods* )
+
+Or you can pass many methods at once by passing *methods* the object whose key is the name of the method and the value is the definition.
+
+````javascript
+_.Number.prototype.learn({
+    times:function(f) { for (var i = 0; i < this; i++) f(i) },
+    square:function() { return this*this }
+})
+````
+
+As a matter of fact, most methods predefined in this script are defined that way.
+
+### .value
+
+The wrapped objects in this module tries to unwrap when necessary but sometimes you have to unwrap manually, notably collection types like `Array` and `Object`.  In which case just `.valueOf()` or `.value`.  The latter is a getter which just invokes `.valueOf()`.
+
+````javascript
+_([0,1,2,3]).slice(1);          // still wrapped
+_([0,1,2,3]).slice(1).value;    // [1,2,3]
+````
+
+You save `()` compared to [jQuery] or [Underscore.js].
+
+### Alternatives to []
+
+One inevitable inconveniences of wrapped objects is you can no longer use `[]` to access the element of collection types.
+
+````javascript
+_([0,1,2,3])[1];        // undefined
+_([0,1,2,3])[4] = 4;    // futile
+_([0,1,2,3]).push(4)    // though this one works
+````
+
+To cope with that, wrapped collection types come with accessors.
+
+#### .has( *key*)
+
+Checks the presence of the *key* in the original value.
+
+````javascript
+_([0,1,2,3]).has(1);            // true
+_([0,1,2,3]).has(4);            // false
+_({zero:0,one:1}).has('zero');  // true
+_({zero:0,one:1}).has('four');  // false
+````
+
+#### .get( *key* )
+
+Gets the value of *key*.  The return value is **wrapped**.
+
+````javascript
+_([0,1,2,3]).get(1);            // _(1)
+_([0,1,2,3]).get(4);            // undefined
+_({zero:0,one:1}).get('zero');  // _(0)
+_({zero:0,one:1}).has('four');  // undefined
+````
+
+#### .set( *key*, *value* )
+
+Sets the value of *key* to *value*.
+
+````javascript
+var wa = [0,1,2,3];
+wa.set(5, 5);   // _(5) is the return value
+wa.value;       // [0,1,2,3,undefined,5]
+var wo = {zero:0,one:1};
+wo.set('five', 5);
+wo.value;       // {zero:0,one:1,five:5}
+````
+#### .delete( *key* )
+
+Deletes *key* from the object.
+Returns `true` on success, `false` on failure (*key* is nonexistent).
+
+````javascript
+var wa = [0,1,2,3];
+wa.delete(0);       // true
+wa.delete(4);       // false
+wa.value;           // [1,2,3]
+var wo = {zero:0,one:1};
+wo.delete('zero');  // true
+wo.delete('five');  // false
+wo.value;           // {one:1}
+````
+
+### Predefined Methods
+
+The whole point of this script to make object (un)?wrapping as easy and transparent as possible.  Therefore most of built-in methods are already `learn()`ed.
+
+````javascript
+_({zero:0,one:1,two:2,three:3})
+    .values()                                   // _([0,1,2,3]),
+    .map(function(x){ return x * x })           // _([0,1,4,9]),
+    .filter(function(x){ return x % 2 === 0})   // _([0,4]),
+    .pop()                                      // _(4)
+    * 10 + 2                                    // 42
+````
+
+See the source for the complete list of predefined methods.
 
 Why Wrap?
 ---------
@@ -180,13 +314,13 @@ Object.defineProperty(Object.prototype, 'keys', {
 
 But not safe enough.  Consider the following:
 
-````
+````javascript
 console.log(({keys:'what keys?'}).keys())
 ````
 
 The problem is *obj.propname* is always *obj['propname']* and its own property always masks its prototype.  Fortunately we have `Function.prototype.apply` (and `Function.prototype.call`) so you can circumvent as follows:
 
-````
+````javascript
 console.log(
     ({}).keys.apply({keys:'what keys?'})
 );
