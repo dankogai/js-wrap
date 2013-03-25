@@ -47,7 +47,7 @@
         return c;
     };
     var _valueOf = function() { return this.__value__ };
-    var _toString = function() { return '' + this.__value__};
+    var _toString = function() { return '' + this.__value__ };
     var _classOf = function() { return this.__class__ };
     var learn = function(name, fun, klass) {
         if (typeof name === 'string') {
@@ -241,7 +241,7 @@
         __class__: { value: 'Object' }
     });
     defineProperties(_.Object.prototype, obj2specs({
-            has: function(k) { return has(this.__value__, k) },
+        has: function(k) { return has(this.__value__, k) },
         get: function(k) { return _(this.__value__[k], true) },
         set: function(k, v) {
             if (!has(this.__value__, k)) this.__size__++;
@@ -356,7 +356,8 @@
     _.Array.autowrap = true;
     // Inheriting from _.Object.prototype
     _.Array.prototype = create(_.Object.prototype, {
-        __class__: { value: 'Array' }
+        __class__: { value: 'Array' },
+        __size__:  { value: 0/0, writable:true }
     });
     _.Array.prototype.learn(picked(AP, [
         'toLocaleString', 'join',
@@ -365,11 +366,14 @@
         'filter', 'forEach', 'some', 'every', 'map',
         'indexOf', 'lastIndexOf', 'reduce', 'reduceRight'
     ]));
-   defineProperties(_.Array.prototype, {
-       length: {
+    defineProperties(_.Array.prototype, {
+        length: {
             get: function() { return this.value.length },
             set: function(n) { return this.value.length = _(n).value * 1 }
-       }
+        },
+        size: {
+            get: function() { return this.value.length }
+        }
     });
     // Function - this one is a little tricky
     _.Function = function(f) {
