@@ -150,28 +150,34 @@
     _.isWrapped = isWrapped;
     // Null
     _.Null = function(b) {
-        return create(Kernel, {
-            __class__: { value: 'Null' },
+        return create(_.Null.prototype, {
             __value__: { value: null }
         });
     };
     // _.Null.autowrap = true;
+    _.Null.prototype = create(Kernel, {
+        __class__: { value: 'Null' }
+    });
     // Undefined
     _.Undefined = function(b) {
-        return create(Kernel, {
-            __class__: { value: 'Undefined' },
+        return create(_.Undefined.prototype, {
             __value__: { value: undefined }
         });
     };
     //_.Undefined.autowrap = true;
+    _.Undefined.prototype = create(Kernel, {
+        __class__: { value: 'Undefined' }
+    });
     // Boolean - wrapped only on explicit request
     _.Boolean = function(b) {
         return create(_.Boolean.prototype, {
-            __class__: { value: 'Boolean' },
             __value__: { value: !!b }
         });
     };
-    _.Boolean.prototype = create(Kernel, obj2specs({
+    _.Boolean.prototype = create(Kernel, {
+        __class__: { value: 'Boolean' }
+    });
+    defineProperties(_.Boolean.prototype, obj2specs({
         not: function() {
             return _.Boolean(!this.value);
         },
@@ -188,12 +194,13 @@
     // Number
     _.Number = function(n) {
         return create(_.Number.prototype, {
-            __class__: { value: 'Number' },
             __value__: { value: 1 * n }
         });
     };
     _.Number.autowrap = true;
-    _.Number.prototype = create(Kernel);
+    _.Number.prototype = create(Kernel, {
+        __class__: { value: 'Number' }
+    });
     _.Number.prototype.learn(picked(NP, [
         'toFixed', 'toExponential', 'toPrecision'
     ]));
@@ -203,12 +210,13 @@
     // String -- without hairy .blink and such
     _.String = function(s) {
         return create(_.String.prototype, {
-            __class__: { value: 'String' },
             __value__: { value: '' + s }
         });
     };
     _.String.autowrap = true;
-    _.String.prototype = create(Kernel);
+    _.String.prototype = create(Kernel, {
+        __class__: { value: 'String' }
+    });
     _.String.prototype.learn(picked(SP, [
         'charAt', 'charCodeAt', 'concat',
         'indexOf', 'lastIndexOf',
@@ -224,14 +232,16 @@
     // Object - wrapped as a collection type
     _.Object = function(o) {
         return create(_.Object.prototype, {
-            __class__: { value: 'Object' },
             __value__: { value: o },
             __size__: { value: keys(o).length, writable: true }
         });
     };
     _.Object.autowrap = true;
-    _.Object.prototype = create(Kernel, obj2specs({
-        has: function(k) { return has(this.__value__, k) },
+    _.Object.prototype = create(Kernel, {
+        __class__: { value: 'Object' }
+    });
+    defineProperties(_.Object.prototype, obj2specs({
+            has: function(k) { return has(this.__value__, k) },
         get: function(k) { return _(this.__value__[k], true) },
         set: function(k, v) {
             if (!has(this.__value__, k)) this.__size__++;
@@ -340,13 +350,14 @@
     // Array
     _.Array = function(a) {
         return create(_.Array.prototype, {
-            __class__: { value: 'Array' },
             __value__: { value: a }
         });
     };
     _.Array.autowrap = true;
     // Inheriting from _.Object.prototype
-    _.Array.prototype = create(_.Object.prototype);
+    _.Array.prototype = create(_.Object.prototype, {
+        __class__: { value: 'Array' }
+    });
     _.Array.prototype.learn(picked(AP, [
         'toLocaleString', 'join',
         'pop', 'push', 'concat', 'reverse', 'shift', 'unshift',
@@ -370,23 +381,25 @@
         extend(w, Kernel);
         extend(w, _.Function.prototype);
         defineProperties(w, {
-            __class__: { value: 'Function' },
             __value__: { value: f }
         });
         return w;
     };
-    _.Function.prototype = create(Kernel);
+    _.Function.prototype = create(Kernel, {
+        __class__: { value: 'Function' }
+    });
     _.Function.prototype.learn(picked(FP, [
         'apply', 'call'
     ]));
     // RegExp - wrapped only opon request
     _.RegExp = function(r) {
         return create(_.RegExp.prototype, {
-            __class__: { value: 'RegExp' },
             __value__: { value: r }
         });
     };
-    _.RegExp.prototype = create(Kernel);
+    _.RegExp.prototype = create(Kernel, {
+        __class__: { value: 'RegExp' }
+    });
     _.RegExp.prototype.learn(picked(RP, [
         'exec', 'test', 'compile'
     ]));
@@ -399,11 +412,12 @@
     // Date - wrapped only opon request
     _.Date = function(d) {
         return create(_.Date.prototype, {
-            __class__: { value: 'Date' },
             __value__: { value: d }
         });
     };
-    _.Date.prototype = create(Kernel);
+    _.Date.prototype = create(Kernel, {
+        __class__: { value: 'Date' }
+    });
     _.Date.prototype.learn(picked(DP, [
         'setUTCFullYear', 'toLocaleString', 'setUTCMilliseconds',
         'toLocaleTimeString', 'toTimeString', /* toString, */
