@@ -1,5 +1,5 @@
 /*
- * $Id: wrap.js,v 0.1 2013/03/24 20:10:15 dankogai Exp dankogai $
+ * $Id: wrap.js,v 0.2 2013/03/26 14:41:19 dankogai Exp dankogai $
  *
  *  (c) 2013 Dan Kogai
  *
