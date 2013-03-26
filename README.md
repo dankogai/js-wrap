@@ -31,11 +31,17 @@ _(42)
   .learn('square', function() { return this*this })
   .square() * 1;    // 1764;
 (42).square();      // TypeError: Object 42 has no method 'square'
+````
+````javascript
 // class method without changing Number
-_.Number.prototype
-  .learn('times', function(f) { for (var i = 0; i < this; i++) f(i) });
-_(42).times(function(n){ console.log(n) });  // see your log!
-(42).times(function(n){ console.log(n) });  // TypeError: Object 42 has no method 'times'
+_.Number.prototype.learn({
+    times: function(f) { for (var i = 0; i < this; i++) f(i) },
+    toThe: function(n) { return Math.pow(this, n) }
+});
+ // see your log!
+_(42).times(function(n){ console.log(_(2).toThe(n)) });
+ // TypeError: Object 42 has no method 'times'
+(42).times(function(n){ console.log(_(2).toThe(n)) });
 
 ````
 

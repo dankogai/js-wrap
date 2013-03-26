@@ -49,7 +49,7 @@
     var _valueOf = function() { return this.__value__ };
     var _toString = function() { return '' + this.__value__ };
     var _classOf = function() { return this.__class__ };
-    var learn = function(name, fun, klass) {
+    function learn(name, fun, klass) {
         if (typeof name === 'string') {
             this[name] = function() {
                 return _(fun.apply(
