@@ -1,6 +1,6 @@
 {
   "name": "js-wrap",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Universal Wrapper Object System for ECMAScript 5 and beyond",
   "main": "wrap.js",
   "directories": {
