@@ -1,5 +1,3 @@
-[![build status](https://secure.travis-ci.org/dankogai/js-wrap.png)](http://travis-ci.org/dankogai/js-wrap)
-
 wrap.js
 =======
 
@@ -26,44 +24,48 @@ Synopsis
 ````javascript
 // for convenience
 var _ = Object.Wrap;
+
 // singleton method!
 _(42)
   .learn('square', function() { return this*this })
-  .square() * 1;    // 1764;
-(42).square();      // TypeError: Object 42 has no method 'square'
-````
-````javascript
-// for convenience -- any identifier will do
-var $ = Object.Wrap
+  .square() * 1;  // 1764;
+(42).square();    // TypeError: Object 42 has no method 'square'
+
 // class method without changing Number
-$.Number.prototype.learn({
+_.Number.prototype.learn({
     times: function(f) { for (var i = 0; i < this; i++) f(i) },
     toThe: function(n) { return Math.pow(this, n) }
 });
  // see your log!
-$(42).times(function(n){ console.log(_(2).toThe(n)) });
+_(42).times(function(n){ console.log( _(2).toThe(n) ) });
  // TypeError: Object 42 has no method 'times'
-(42).times(function(n){ console.log(_(2).toThe(n)) });
-
+(42).times(function(n){ console.log(   (2).toThe(n) ) });
 ````
 
 Description
 -----------
 
-This script provides a universal wrapper object system for ECMAScript 5 and beyond.
+This script provides a universal wrapper object system for ECMAScript
+5 and beyond.
 
 ### Object.Wrap( *obj* *[, klass]* )
 
-That's where all begins.  It wraps the object in a way that behaves almost the same as unwrapped original without worring about clobbering the prototype chain.
+That's where all begins.  It wraps the object in a way that behaves
+almost the same as unwrapped original without worring about clobbering
+the prototype chain.
 
-Like `Object()` which wraps primitives types and leaves objects intact, `Object.Wrap()` returns wrapped object if it can wrap it, or the original object if it is already wrapped or it doesn't know how to wrap it.
+Like `Object()` which wraps primitives types and leaves objects
+intact, `Object.Wrap()` returns wrapped object if it can wrap it, or
+the original object if it is already wrapped or it doesn't know how to
+wrap it.
 
 ````javascript
 Object(o) === o;        // true if o is already an object
 Object.Wrap(o) === o;   // true if o is already wrapped
 ````
 
-And if wrapped, you can access its original, unwrapped value via `.valueOf()` or `.value`, which is a getter that calls `.valueOf()`.
+And if wrapped, you can access its original, unwrapped value via
+`.valueOf()` or `.value`, which is a getter that calls `.valueOf()`.
 
 Currently following types are wrapped by default:
 
@@ -86,7 +88,8 @@ assert(wo !== n && wo.value === o);
 assert(wa !== n && wa.value === a);
 ````
 
-And the following types are wrapped by giving truthy value to the secound argument *klass*:
+And the following types are wrapped by giving truthy value to the
+secound argument *klass*:
 
 + `Null`
 + `Undefined`
@@ -117,14 +120,15 @@ assert(Object.Wrap(d) === d && wd !== d && wd.value === d);
 You can directly call `Object.wrap()` but it is handier to alias that with following idiom:
 
 ````javascript
-var _ = Object.Wrap;    // or '$' or 'wrap' or any name you like -- it's lexical
+var _ = Object.Wrap;    // or '$' or 'wrap' or any name you like
 ````
 
 From now on, we assume `_` be aliased to `Object.Wrap`.
 
 #### Why `Null`, `Undefined`, and `Boolean` are not wrapped by default
 
-They are not wrapped by default because unlike `Numbers` and `String`, boolean operators do not coerce.
+They are not wrapped by default because unlike `Numbers` and `String`,
+boolean operators do not coerce.
 
 ````javascript
 Object(21)  + Object(21);   // 42
@@ -148,24 +152,33 @@ _('4') + _('2');        // '42'
 
 ### `.learn()`
 
-It is pointless to wrap objects unless you can extend it at ease.  We resort to wrapping them because [it is considered harmful to extend built-in prototypes](#why-wrap), most notably `Object.prototype`.  But to extend methods for wrapped objects, you have to first unwrap `this` and all arguments, feed it to the functions, then wrap it back again.  That's pain in the rhino arse!
+It is pointless to wrap objects unless you can extend it at ease.  We
+resort to wrapping them because [it is considered harmful to extend
+built-in prototypes](#why-wrap), most notably `Object.prototype`.  But
+to extend methods for wrapped objects, you have to first unwrap `this`
+and all arguments, feed it to the functions, then wrap it back again.
+That's pain in the rhino arse!
 
 the `.learn()` method is exactly for that.
 
 #### .learn(*name*, *fun* *[, klass]*)
 
-You have already seen it in [Synopsis](#synopsis).  Just define a method as you define an ordinary method in prototype and `.learn()` converts that for wrapped version.
+You have already seen it in [Synopsis](#synopsis).  Just define a
+method as you define an ordinary method in prototype and `.learn()`
+converts that for wrapped version.
 
 ````
 var wn = _(42);
 wn.learn('square', function() { return this*this }, 'Number');
 ````
 
-The third argument *klass* is optional.  If specified it is used to determine the return type.  When lost, just leave it blank.
+The third argument *klass* is optional.  If specified it is used to
+determine the return type.  When lost, just leave it blank.
 
 #### .learn( *methods* )
 
-Or you can pass many methods at once by passing *methods* the object whose key is the name of the method and the value is the definition.
+Or you can pass many methods at once by passing *methods* the object
+whose key is the name of the method and the value is the definition.
 
 ````javascript
 _.Number.prototype.learn({
@@ -174,11 +187,15 @@ _.Number.prototype.learn({
 })
 ````
 
-As a matter of fact, most methods predefined in this script are defined that way.
+As a matter of fact, most methods predefined in this script are
+defined that way.
 
 ### .value
 
-The wrapped objects in this module tries to unwrap when necessary but sometimes you have to unwrap manually, notably collection types like `Array` and `Object`.  In which case just `.valueOf()` or `.value`.  The latter is a getter which just invokes `.valueOf()`.
+The wrapped objects in this module tries to unwrap when necessary but
+sometimes you have to unwrap manually, notably collection types like
+`Array` and `Object`.  In which case just `.valueOf()` or `.value`.
+The latter is a getter which just invokes `.valueOf()`.
 
 ````javascript
 _([0,1,2,3]).slice(1);          // still wrapped
@@ -189,7 +206,8 @@ You save `()` compared to [jQuery] or [Underscore.js].
 
 ### Alternatives to []
 
-One inevitable inconveniences of wrapped objects is you can no longer use `[]` to access the element of collection types.
+One inevitable inconveniences of wrapped objects is you can no longer
+use `[]` to access the element of collection types.
 
 ````javascript
 _([0,1,2,3])[1];        // undefined
@@ -251,7 +269,9 @@ wo.value;           // {one:1}
 
 ### .methods
 
-The whole point of this script to make object (un)?wrapping as easy, transparent and intuitive as possible.  Therefore most of built-in methods are already `learn()`ed.
+The whole point of this script to make object (un)?wrapping as easy,
+transparent and intuitive as possible.  Therefore most of built-in
+methods are already `learn()`ed.
 
 ````javascript
 _({zero:0,one:1,two:2,three:3})
@@ -262,7 +282,8 @@ _({zero:0,one:1,two:2,three:3})
     * 10 + 2                                    // 42
 ````
 
-Like Ruby, the wrapped object has `.methods` so you can ask the object itself what it can do.
+Like Ruby, the wrapped object has `.methods` so you can ask the object
+itself what it can do.
 
 ````javascript
 console.log(_(null, 1).methods)
@@ -280,7 +301,7 @@ Why Wrap?
 
 [Prototype.js]: http://prototypejs.org/
 
-1. Prototype extension is powerful
+1. Prototype extension is powerful.
 2. Prototype extension is dangerous.
 
 It's powerful because it propagates to all instances.
@@ -360,11 +381,15 @@ That's where **wrapping** came to rescue.  Here's how it is done.
     + Underscore.js does that via `_.mixin()`
     + wrap.js does that via `.learn()
 
-This wrapper method approach has proven very successful.  But most are limited to collection types.  wrap.js pushes further.  You can wrap primitives and even functions!
+This wrapper method approach has proven very successful.  But most are
+limited to collection types.  wrap.js pushes further.  You can wrap
+primitives and even functions!
 
 ### What's the catch?
 
-Performance, maybe. Under the hood, you have to unwrap and rewrap for each method invocation.  I'm yet to benchmark this script but chances are it is slower than direct prototype extension.
+Performance, maybe. Under the hood, you have to unwrap and rewrap for
+each method invocation.  I'm yet to benchmark this script but chances
+are it is slower than direct prototype extension.
 
 See Also
 --------
