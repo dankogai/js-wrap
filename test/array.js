@@ -54,5 +54,18 @@ if (this['window'] !== this) {
             it('.' + meth + '() return value equals',
                eq_deeply(_.isWrapped(rwa) ? rwa.value : rwa, ra)); 
         });
-    });
+        // methods that mutate size
+        var wa = _(new Array(42));
+        it('.size after .push', 
+           ok(wa.push(42) && wa.length === 43 && wa.size === 1));
+        it('.size after .pop', 
+           ok(wa.pop().value === 42 && wa.length === 42 && wa.size === 0));
+        it('.size after .unshift', 
+           ok(wa.unshift(42) && wa.length === 43 && wa.size === 1));
+        it('.size after .shift', 
+           ok(wa.shift().value === 42 && wa.length === 42 && wa.size === 0));
+        it('.size after .splice',
+           ok(wa.splice(21).length === 21
+              && wa.length === 21 && wa.size == 0));
+        });
 })(this);

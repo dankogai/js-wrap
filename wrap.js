@@ -350,30 +350,55 @@
     // Array
     _.Array = function(a) {
         return create(_.Array.prototype, {
-            __value__: { value: a }
+            __value__: { value: a },
+            __size__: { value: keys(a).length, writable: true }
         });
     };
     _.Array.autowrap = true;
     // Inheriting from _.Object.prototype
     _.Array.prototype = create(_.Object.prototype, {
         __class__: { value: 'Array' },
-        __size__:  { value: 0/0, writable:true }
     });
     _.Array.prototype.learn(picked(AP, [
         'toLocaleString', 'join',
-        'pop', 'push', 'concat', 'reverse', 'shift', 'unshift',
-        'slice', 'splice', 'sort',
+        /*'pop' 'push',*/ 'concat', 'reverse', /*'shift', 'unshift'*/,
+        'slice', /*'splice',*/ 'sort',
         'filter', 'forEach', 'some', 'every', 'map',
         'indexOf', 'lastIndexOf', 'reduce', 'reduceRight'
     ]));
+    var _splice = AP.splice,
+    _pop = AP.pop,     _push = AP.push,
+    _shift = AP.shift, _unshift = AP.unshift;
+    defineProperties(_.Array.prototype, obj2specs({
+        pop:function() {
+            if (!this.value.length) return undefined;
+            this.__size__--;
+            return _(_pop.call(this.__value__));
+        },
+        push:function() {
+            this.__size__ += keys(arguments).length;
+            return _(_push.apply(this.__value__, arguments));
+        },
+        shift:function() {
+            if (!this.value.length) return undefined;
+            this.__size__--;
+            return _(_shift.call(this.__value__));
+        },
+        unshift:function() {
+            this.__size__ += keys(arguments).length;
+            return _(_unshift.apply(this.__value__, arguments));
+        },
+        splice:function() {
+            var ret = _splice.apply(this.__value__, arguments);
+            this.__size__ = keys(this.__value__).length;
+            return _(ret);
+        }
+    }));
     defineProperties(_.Array.prototype, {
         length: {
             get: function() { return this.value.length },
             set: function(n) { return this.value.length = _(n).value * 1 }
         },
-        size: {
-            get: function() { return this.value.length }
-        }
     });
     // Function - this one is a little tricky
     _.Function = function(f) {
