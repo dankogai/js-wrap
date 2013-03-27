@@ -45,8 +45,15 @@ _(42).times(function(n){ console.log( _(2).toThe(n) ) });
 Description
 -----------
 
-This script provides a universal wrapper object system for ECMAScript
-5 and beyond.
+As seen above, `Object.Wrap()` wraps objects as transparently and painlessly as possible:
+
++ transparently
+  + wrapped objects have same methods as its original
+  + wrapped objects automatical unwraps on demand
++ painlessly
+  + you can extend wrapped objects as easy as unwrapped version
+
+So you can extend built-in methods without tainting built-in prototypes.
 
 ### Object.Wrap( *obj* *[, klass]* )
 
