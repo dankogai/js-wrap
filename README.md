@@ -47,4 +47,12 @@ _(42).times(function(n){ console.log( _(2).toThe(n) ) });
 Description
 -----------
 
+As seen above, `Object.Wrap()` wraps objects as transparently and painlessly as possible:
+
++ transparently
+  + wrapped objects have same methods as its original
+  + wrapped objects automatical unwraps on demand
++ painlessly
+  + you can extend wrapped objects as easy as unwrapped version
+
 See [wrap.md](wrap.md) for details!
