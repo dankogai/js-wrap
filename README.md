@@ -55,4 +55,6 @@ As seen above, `Object.Wrap()` wraps objects as transparently and painlessly as 
 + painlessly
   + you can extend wrapped objects as easy as unwrapped version
 
-See [wrap.md](wrap.md) for details!
+So you can extend built-in methods without tainting built-in prototypes.
+
+See [wrap.md](wrap.md#description) for details!
