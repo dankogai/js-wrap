@@ -194,15 +194,15 @@
     // Number
     _.Number = function(n) {
         return create(_.Number.prototype, {
-            __value__: { value: 1 * n }
+            __value__: { value: +n }
         });
     };
     _.Number.autowrap = true;
     _.Number.prototype = create(Kernel, {
         __class__: { value: 'Number' }
     });
-    _.Number.prototype.learn(picked(NP, [
-        'toFixed', 'toExponential', 'toPrecision'
+    _.Number.prototype.learn(omitted(NP, [
+        'constructor', 'toString', 'valueOf'
     ]));
     defineProperties(_.Number.prototype, obj2specs({
         toInteger: function(n) { return _.Number(~~this.value) }
@@ -217,14 +217,8 @@
     _.String.prototype = create(Kernel, {
         __class__: { value: 'String' }
     });
-    _.String.prototype.learn(picked(SP, [
-        'charAt', 'charCodeAt', 'concat',
-        'indexOf', 'lastIndexOf',
-        'localeCompare', 'match', 'replace', 'search',
-        'slice', 'split', 'substring', 'substr',
-        'toLowerCase', 'toLocaleLowerCase',
-        'toUpperCase', 'toLocaleUpperCase',
-        'trim', 'trimLeft', 'trimRight'
+    _.String.prototype.learn(omitted(SP, [
+        'length', 'constructor', 'toString', 'valueOf'
     ]));
     defineProperties(_.String.prototype, {
         length: { get: function() { return this.value.length } }
@@ -236,10 +230,12 @@
             __size__: { value: keys(o).length, writable: true }
         });
     };
-    _.Object.autowrap = true;
     _.Object.prototype = create(Kernel, {
         __class__: { value: 'Object' }
     });
+    _.Object.autowrap = true;
+    // _.Object.prototype.learn(omitteded(OP, [
+    // ]));
     defineProperties(_.Object.prototype, obj2specs({
         has: function(k) { return has(this.__value__, k) },
         get: function(k) { return _(this.__value__[k], true) },
@@ -357,38 +353,34 @@
     _.Array.autowrap = true;
     // Inheriting from _.Object.prototype
     _.Array.prototype = create(_.Object.prototype, {
-        __class__: { value: 'Array' },
+        __class__: { value: 'Array' }
     });
-    _.Array.prototype.learn(picked(AP, [
-        'toLocaleString', 'join',
-        /*'pop' 'push',*/ 'concat', 'reverse', /*'shift', 'unshift'*/,
-        'slice', /*'splice',*/ 'sort',
-        'filter', 'forEach', 'some', 'every', 'map',
-        'indexOf', 'lastIndexOf', 'reduce', 'reduceRight'
+    _.Array.prototype.learn(omitted(AP, [
+        'length', 'constructor', 'toString', 'valueOf'
     ]));
     var _splice = AP.splice,
-    _pop = AP.pop,     _push = AP.push,
+    _pop = AP.pop, _push = AP.push,
     _shift = AP.shift, _unshift = AP.unshift;
     defineProperties(_.Array.prototype, obj2specs({
-        pop:function() {
+        pop: function() {
             if (!this.value.length) return undefined;
             this.__size__--;
             return _(_pop.call(this.__value__));
         },
-        push:function() {
+        push: function() {
             this.__size__ += keys(arguments).length;
             return _(_push.apply(this.__value__, arguments));
         },
-        shift:function() {
+        shift: function() {
             if (!this.value.length) return undefined;
             this.__size__--;
             return _(_shift.call(this.__value__));
         },
-        unshift:function() {
+        unshift: function() {
             this.__size__ += keys(arguments).length;
             return _(_unshift.apply(this.__value__, arguments));
         },
-        splice:function() {
+        splice: function() {
             var ret = _splice.apply(this.__value__, arguments);
             this.__size__ = keys(this.__value__).length;
             return _(ret);
@@ -398,7 +390,7 @@
         length: {
             get: function() { return this.value.length },
             set: function(n) { return this.value.length = _(n).value * 1 }
-        },
+        }
     });
     // Function - this one is a little tricky
     _.Function = function(f) {
@@ -429,8 +421,8 @@
     _.RegExp.prototype = create(Kernel, {
         __class__: { value: 'RegExp' }
     });
-    _.RegExp.prototype.learn(picked(RP, [
-        'exec', 'test', 'compile'
+    _.RegExp.prototype.learn(omitted(RP, [
+        'constructor', 'toString', 'valueOf'
     ]));
     defineProperties(_.RegExp.prototype, {
         source: { get: function() { return this.value.source } },
@@ -447,22 +439,14 @@
     _.Date.prototype = create(Kernel, {
         __class__: { value: 'Date' }
     });
-    _.Date.prototype.learn(picked(DP, [
-        'setUTCFullYear', 'toLocaleString', 'setUTCMilliseconds',
-        'toLocaleTimeString', 'toTimeString', /* toString, */
-        'getUTCMilliseconds', 'getUTCFullYear', 'getMinutes',
-        'toISOString', 'getTimezoneOffset', 'getYear',
-        'setUTCMinutes', 'setUTCHours', 'getFullYear',
-        'getUTCSeconds', 'getUTCDay', 'getMonth',
-        'getMilliseconds', 'toDateString', 'getHours',
-        'getUTCDate', 'getDay', 'setMonth', 'getUTCHours',
-        'toLocaleDateString', 'toUTCString', 'setMinutes',
-        'toGMTString', 'getTime', 'setYear', 'setDate', 'setTime',
-        'getUTCMinutes', 'getDate', /* 'valueOf', 'toJSON', */
-        'setUTCMonth', 'setFullYear', 'getSeconds', 'getUTCMonth',
-        'setMilliseconds', 'setSeconds', 'setUTCSeconds',
-        'setHours', 'setUTCDate'
+    _.Date.prototype.learn(omitted(DP, [
+        'constructor', 'toString', 'valueOf', 'toJSON'
     ]));
+    defineProperties(_.Date.prototype, {
+        toJSON: {
+            value: function(r, s) { return this.value.toJSON(r, s) }
+        }
+    });
     // Install!
     //   Should we use installproperty.js ?
     //   https://github.com/dankogai/js-installproperty
